@@ -8,7 +8,8 @@ defmodule Day02 do
 
   @data [__DIR__, "DATA"]
         |> Path.join()
-        |> File.read!()
+        |> File.stream!()
+        |> Enum.to_list()
 
   def data do
     @data
