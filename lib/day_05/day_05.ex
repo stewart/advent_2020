@@ -1,32 +1,38 @@
 defmodule Day05 do
   @moduledoc false
 
-  @rows 0..127
-  @seats 0..7
-
   def run do
     part1()
     part2()
+  end
+
+  one_pattern = :binary.compile_pattern(~w[F L])
+  nil_pattern = :binary.compile_pattern(~w[B R])
+
+  convert_to_seat_id = fn line ->
+    line
+    |> String.replace(one_pattern, "0")
+    |> String.replace(nil_pattern, "1")
+    |> String.to_integer(2)
   end
 
   @data [__DIR__, "DATA"]
         |> Path.join()
         |> File.stream!()
         |> Stream.map(&String.trim/1)
-        |> Enum.map(fn <<row::binary-size(7), seat::binary>> -> {row, seat} end)
+        |> Stream.map(convert_to_seat_id)
+        |> MapSet.new()
 
   def data do
-    for {row, seat} <- @data,
-      into: MapSet.new(),
-      do: row_number(row) * 8 + seat_number(seat)
+    @data
   end
 
-  # multiply row number by 8 and add column to get seat ID, find highest id.
+  # Highest seat ID.
   def part1 do
     Enum.max(data())
   end
 
-  # find your seat id -- it is _not_ present in the list but has immediate neighbours (ID +1, ID -1)
+  # Seat ID which is _not_ present in the list, but has immediate neighbours.
   def part2 do
     seats = data()
 
@@ -36,30 +42,4 @@ defmodule Day05 do
       end
     end)
   end
-
-  defp split(range) do
-    Enum.split(range, div(Enum.count(range), 2))
-  end
-
-  defp front(path, range, continuation) do
-    case split(range) do
-      {[result], _} -> result
-      {front, _} -> continuation.(path, front)
-    end
-  end
-
-  defp back(path, range, continuation) do
-    case split(range) do
-      {_, [result]} -> result
-      {_, back} -> continuation.(path, back)
-    end
-  end
-
-  defp row_number(path, range \\ @rows)
-  defp row_number(<<"F", rest::binary>>, range), do: front(rest, range, &row_number/2)
-  defp row_number(<<"B", rest::binary>>, range), do: back(rest, range, &row_number/2)
-
-  defp seat_number(path, range \\ @seats)
-  defp seat_number(<<"L", rest::binary>>, range), do: front(rest, range, &seat_number/2)
-  defp seat_number(<<"R", rest::binary>>, range), do: back(rest, range, &seat_number/2)
 end
