@@ -22,6 +22,8 @@ defmodule Advent.MixProject do
   defp deps do
     [
       {:decimal, "~> 2.0"},
+      {:flow, "~> 1.0"},
+      {:nimble_parsec, "~> 1.1"},
       {:timex, "~> 3.6"}
     ]
   end
