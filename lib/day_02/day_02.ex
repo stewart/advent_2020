@@ -12,7 +12,9 @@ defmodule Day02 do
     [policy, password] = String.split(policy_str, ": ", parts: 2)
     [count_range, character] = String.split(policy, " ", parts: 2)
     [count_min, count_max] = String.split(count_range, "-", parts: 2)
-    {{character, to_integer(count_min), to_integer(count_max)}, String.split(password, "", trim: true)}
+
+    {{character, to_integer(count_min), to_integer(count_max)},
+     String.split(password, "", trim: true)}
   end
 
   @data [__DIR__, "DATA"]

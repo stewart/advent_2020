@@ -37,7 +37,7 @@ defmodule Day05 do
     seats = data()
 
     Enum.find_value(seats, fn id ->
-      if (id + 2 in seats) and not (id + 1 in seats) do
+      if (id + 2) in seats and not ((id + 1) in seats) do
         id + 1
       end
     end)

@@ -8,15 +8,15 @@ defmodule Day04 do
 
   parse = fn attr_list ->
     for <<key::binary-size(3), ":", value::binary>> <- attr_list,
-      into: %{},
-      do: {key, value}
+        into: %{},
+        do: {key, value}
   end
 
   @data [__DIR__, "DATA"]
         |> Path.join()
         |> File.read!()
         |> String.split("\n\n")
-        |> Stream.map(& &1 |> String.replace("\n", " ") |> String.split(" ", trim: true))
+        |> Stream.map(&(&1 |> String.replace("\n", " ") |> String.split(" ", trim: true)))
         |> Enum.map(parse)
 
   def data do
@@ -38,7 +38,7 @@ defmodule Day04 do
   @required ~w[byr iyr eyr hgt hcl ecl pid]
 
   defp has_required_fields?(passport) do
-    Enum.all?(@required, & Map.has_key?(passport, &1))
+    Enum.all?(@required, &Map.has_key?(passport, &1))
   end
 
   defp all_fields_valid?(passport) do

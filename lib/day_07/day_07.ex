@@ -7,12 +7,14 @@ defmodule Day07 do
   end
 
   parse_bags = fn
-    ["no other bags"] -> %{}
+    ["no other bags"] ->
+      %{}
 
-    bags -> Map.new(bags, fn bag ->
-      [_, count, color] = Regex.run(~r/^(\d+)\s+(.+)\s+bags?$/, bag)
-      {color, String.to_integer(count)}
-    end)
+    bags ->
+      Map.new(bags, fn bag ->
+        [_, count, color] = Regex.run(~r/^(\d+)\s+(.+)\s+bags?$/, bag)
+        {color, String.to_integer(count)}
+      end)
   end
 
   parse = fn input ->
@@ -54,7 +56,7 @@ defmodule Day07 do
 
   def total_baggage(rules, color) do
     Enum.reduce(rules[color], 1, fn {bag, count}, acc ->
-      (count * total_baggage(rules, bag)) + acc
+      count * total_baggage(rules, bag) + acc
     end)
   end
 end
