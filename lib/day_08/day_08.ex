@@ -28,11 +28,15 @@ defmodule Day08 do
 
     def run(%Program{instruction: instr, memory: memory} = program) do
       case memory[instr] do
-        {:nop, _} -> {:ok, advance(program)}
-        {:acc, arg} -> {:ok, program |> update_accumulator(arg) |> advance()}
-        {:jmp, offset} -> {:ok, jump(program, offset)}
-        _ -> {:done, program}
+        {:nop, _} -> advance(program)
+        {:acc, arg} -> program |> update_accumulator(arg) |> advance()
+        {:jmp, offset} -> jump(program, offset)
       end
+    end
+
+    # Program is done if instruction pointer is to an OOM location.
+    def done?(%Program{memory: memory, instruction: instruction}) do
+      is_nil(memory[instruction])
     end
 
     defp jump(%Program{instruction: instr} = program, offset) when is_integer(offset) do
@@ -68,7 +72,7 @@ defmodule Day08 do
   # identify the value in the program's accumulator
   def part1 do
     program = Program.new(data())
-    {:loop, program} = halting_problem(program)
+    {:ok, program} = run_until_loop(program)
     program.accumulator
   end
 
@@ -78,37 +82,56 @@ defmodule Day08 do
   def part2 do
     program = Program.new(data())
     program = fix_corruption(program)
+    program = run_until_done(program)
     program.accumulator
   end
 
   # a single instruction in the program is corrupted.
   # a non-corrupted program runs until the instruction pointer is outside of memory.
   defp fix_corruption(program) do
-    suspect_instructions =
-      for {id, {op, _}} when op in [:jmp, :nop] <- program.memory, do: id
+    suspect_instructions = for {id, {op, _}} when op in [:jmp, :nop] <- program.memory, do: id
 
     Enum.find_value(suspect_instructions, fn instr_id ->
       modified_program = Program.modify_instruction(program, instr_id)
 
-      case halting_problem(modified_program) do
-        {:loop, _} -> false
-        {:done, result} -> result
+      case run_until_loop(modified_program) do
+        {:ok, _} -> false
+        :error -> modified_program
       end
     end)
   end
 
-  # runs the program until an instruction loop is detected, or it finishes.
-  defp halting_problem(program) do
+  # runs the program until it loops
+  # returns {:ok, final_state} if the program loops, :error otherwise
+  defp run_until_loop(program) do
+    cycle = Stream.cycle([nil])
+    initial = {program, MapSet.new()}
+
+    Enum.reduce_while(cycle, initial, fn _, {program, seen} ->
+      if program.instruction in seen do
+        {:halt, {:ok, program}}
+      else
+        updated = Program.run(program)
+
+        if Program.done?(updated) do
+          {:halt, :error}
+        else
+          {:cont, {updated, MapSet.put(seen, program.instruction)}}
+        end
+      end
+    end)
+  end
+
+  defp run_until_done(program) do
     cycle = Stream.cycle([nil])
 
-    Enum.reduce_while(cycle, {program, MapSet.new()}, fn _, {program, instr} ->
-      if program.instruction in instr do
-        {:halt, {:loop, program}}
+    Enum.reduce_while(cycle, program, fn _, program ->
+      updated = Program.run(program)
+
+      if Program.done?(updated) do
+        {:halt, updated}
       else
-        case Program.run(program) do
-          {:ok, updated} -> {:cont, {updated, MapSet.put(instr, program.instruction)}}
-          {:done, result} -> {:halt, {:done, result}}
-        end
+        {:cont, updated}
       end
     end)
   end
