@@ -1,15 +1,23 @@
 defmodule Day17 do
   @moduledoc false
 
-  def run do
-    part1()
-    part2()
+  build_map = fn {line, y} ->
+    line
+    |> String.split("", trim: true)
+    |> Stream.with_index()
+    |> Enum.map(fn
+      {"#", x} -> {{x, y}, :active}
+      {".", x} -> {{x, y}, :inactive}
+    end)
   end
 
   @data [__DIR__, "DATA"]
         |> Path.join()
         |> File.stream!()
-        |> Enum.to_list()
+        |> Stream.map(&String.trim/1)
+        |> Stream.with_index()
+        |> Stream.flat_map(build_map)
+        |> Map.new()
 
   def data do
     @data
