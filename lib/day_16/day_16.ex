@@ -3,24 +3,15 @@ defmodule Day16 do
 
   import String, only: [to_integer: 1]
 
-  # what is your ticket scanning error rate?
-  # find values which are not valid for any rule, and sum
   def part1 do
     {rules, _yours, nearby} = data()
 
-    nearby
-    |> Enum.flat_map(& invalid_fields(&1, rules))
-    |> Enum.sum()
-  end
-
-  defp invalid_fields(ticket, rules) do
-    Enum.reject(ticket, & valid?(&1, rules))
-  end
-
-  defp valid?(value, rules) do
-    Enum.any?(rules, fn {_name, range_a, range_b} -> 
-      value in range_a or value in range_b
-    end)
+    Enum.sum(
+      for ticket <- nearby,
+          field <- ticket,
+          not valid?(field, rules),
+          do: field
+    )
   end
 
   # reject the invalid tickets.
@@ -30,38 +21,29 @@ defmodule Day16 do
     {rules, yours, nearby} = data()
 
     valid_nearby_tickets =
-      Enum.filter(nearby, & valid_ticket?(&1, rules))
+      for ticket <- nearby,
+          valid_ticket?(ticket, rules),
+          do: ticket
 
-    rule_mappings =
-      determine_rule_mappings(rules, valid_nearby_tickets)
+    mappings = solve_field_mapping(rules, valid_nearby_tickets)
 
-    departure_values =
-      for {"departure" <> _, idx} <- rule_mappings, do: Enum.at(yours, idx)
-
-    Enum.reduce(departure_values, &Kernel.*/2)
+    Enum.reduce(
+      for({"departure" <> _, idx} <- mappings, do: Enum.at(yours, idx)),
+      0,
+      &Kernel.*/2
+    )
   end
 
-  # using tickets and exclusions in rule overlaps,
-  # solve for which rule corresponds to which field.
-  defp determine_rule_mappings(rules, tickets) do
-    cycle = Stream.cycle([true])
-    mappings = Map.new(rules, fn {name, _, _} -> {name, nil} end)
-
-    Enum.reduce_while(cycle, mappings, fn _, mappings ->
-      solved? = Enum.all?(mappings, fn {_, idx} -> idx end)
-      if solved? do
-        {:halt, mappings}
-      else
-        {:cont, solve(mappings, tickets, rules)}
-      end
-    end)
+  defp solve_field_mapping(rules, tickets, known \\ %{}) do
+    %{}
   end
 
   defp valid_ticket?(ticket, rules) do
-    Enum.all?(ticket, & valid?(&1, rules))
+    Enum.all?(ticket, &valid?(&1, rules))
   end
 
-  defp solve(mappings, tickets, rules) do
+  defp valid?(field, rules) do
+    Enum.any?(rules, fn {_, a, b} -> field in a or field in b end)
   end
 
   ## Gross data code below ---
@@ -78,7 +60,7 @@ defmodule Day16 do
       "nearby tickets:\n" <> nearby
     ] = @data
 
-    split = & String.split(&1, "\n", trim: true)
+    split = &String.split(&1, "\n", trim: true)
 
     {
       field_rules |> split.() |> Enum.map(&parse_rule!/1),
@@ -90,6 +72,7 @@ defmodule Day16 do
   defp parse_rule!("" <> rules_str) do
     [_, name, mina, maxa, minb, maxb] =
       Regex.run(~r/^([\w\s]+): (\d+)-(\d+) or (\d+)-(\d+)$/, rules_str)
+
     {name, to_integer(mina)..to_integer(maxa), to_integer(minb)..to_integer(maxb)}
   end
 

@@ -1,8 +1,71 @@
 defmodule Day13 do
   @moduledoc false
 
-  @timestamp 1000066
-  @buses [13, nil, nil, 41, nil, nil, nil, 37, nil, nil, nil, nil, nil, 659, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 19, nil, nil, nil, 23, nil, nil, nil, nil, nil, 29, nil, 409, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 17]
+  @timestamp 1_000_066
+  @buses [
+    13,
+    nil,
+    nil,
+    41,
+    nil,
+    nil,
+    nil,
+    37,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    659,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    19,
+    nil,
+    nil,
+    nil,
+    23,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    29,
+    nil,
+    409,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    nil,
+    17
+  ]
 
   def data do
     {@timestamp, @buses}
@@ -17,15 +80,14 @@ defmodule Day13 do
   end
 
   defp in_service(buses), do: Enum.filter(buses, & &1)
-  defp find_next_bus(buses, timestamp), do: Enum.min_by(buses, & &1 - rem(timestamp, &1))
-  defp time_to_wait(timestamp, next_bus), do: (next_bus - rem(timestamp, next_bus))
+  defp find_next_bus(buses, timestamp), do: Enum.min_by(buses, &(&1 - rem(timestamp, &1)))
+  defp time_to_wait(timestamp, next_bus), do: next_bus - rem(timestamp, next_bus)
 
   # find earliest timestamp at which all buses leave in ID sequence
   def part2 do
     {_, buses} = data()
 
-    active =
-      for {bus, idx} when not is_nil(bus) <- Stream.with_index(buses), do: {bus, idx}
+    active = for {bus, idx} when not is_nil(bus) <- Stream.with_index(buses), do: {bus, idx}
 
     merge = fn {xp, xo}, {yp, yo} ->
       {gcd, s, _} = gcd_ext(xp, yp)
@@ -44,6 +106,7 @@ defmodule Day13 do
 
   def gcd_ext(x, 0), do: {x, 1, 0}
   def gcd_ext(0, y), do: {y, 0, 1}
+
   def gcd_ext(x, y) do
     {g, s, t} = gcd_ext(y, rem(x, y))
     {g, t, s - div(x, y) * t}

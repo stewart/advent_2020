@@ -37,7 +37,7 @@ defmodule Day10 do
       acc ->
         acc
         |> Map.put_new(joltage, 0)
-        |> Map.update!(joltage, & &1 + (acc[joltage - n] || 0))
+        |> Map.update!(joltage, &(&1 + (acc[joltage - n] || 0)))
     end
   end
 end

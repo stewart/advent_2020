@@ -60,7 +60,7 @@ defmodule Day11 do
   end
 
   def adjacent_taken_seats(%{} = seat_map, seat) do
-    Enum.count(neighbours(seat), & seat_map[&1] == :taken)
+    Enum.count(neighbours(seat), &(seat_map[&1] == :taken))
   end
 
   defp neighbours({x, y} = _seat) do
@@ -68,7 +68,7 @@ defmodule Day11 do
   end
 
   def visible_taken_seats(%{} = seat_map, seat) do
-    Enum.count(visible(seat_map, seat), & seat_map[&1] == :taken)
+    Enum.count(visible(seat_map, seat), &(seat_map[&1] == :taken))
   end
 
   defp visible(%{} = seat_map, {x, y} = _seat) do

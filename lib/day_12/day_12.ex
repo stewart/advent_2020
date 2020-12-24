@@ -53,12 +53,20 @@ defmodule Day12 do
     def instruct({?R, v}, ship), do: adjust_wp_heading(ship, v)
     def instruct({?L, v}, ship), do: adjust_wp_heading(ship, 360 - v)
 
-    defp move_wp(%__MODULE__{wp: {x, y}} = ship, {dx, dy}), do: %__MODULE__{ship | wp: {x + dx, y + dy}}
-    defp move_ship(%__MODULE__{pos: {x, y}, wp: {wx, wy}} = ship, n), do: %__MODULE__{ship | pos: {x + (n * wx), y + (n * wy)}}
+    defp move_wp(%__MODULE__{wp: {x, y}} = ship, {dx, dy}),
+      do: %__MODULE__{ship | wp: {x + dx, y + dy}}
 
-    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 90), do: %__MODULE__{ship | wp: {y, -x}}
-    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 180), do: %__MODULE__{ship | wp: {-x, -y}}
-    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 270), do: %__MODULE__{ship | wp: {-y, x}}
+    defp move_ship(%__MODULE__{pos: {x, y}, wp: {wx, wy}} = ship, n),
+      do: %__MODULE__{ship | pos: {x + n * wx, y + n * wy}}
+
+    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 90),
+      do: %__MODULE__{ship | wp: {y, -x}}
+
+    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 180),
+      do: %__MODULE__{ship | wp: {-x, -y}}
+
+    defp adjust_wp_heading(%__MODULE__{wp: {x, y}} = ship, 270),
+      do: %__MODULE__{ship | wp: {-y, x}}
   end
 
   def data do

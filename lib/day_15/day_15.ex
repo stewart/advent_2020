@@ -20,15 +20,16 @@ defmodule Day15 do
     Enum.reduce(1..turns, {nil, %{}}, fn
       n, {_, acc} when n <= length(starting_numbers) ->
         val = Enum.at(starting_numbers, n - 1)
-        {val, Map.update(acc, val, [n], & [n, hd(&1)])}
+        {val, Map.update(acc, val, [n], &[n, hd(&1)])}
 
       n, {prev, acc} ->
-        val = case acc do
-          %{^prev => [one, two | _]} -> one - two
-          _ -> 0
-        end
+        val =
+          case acc do
+            %{^prev => [one, two | _]} -> one - two
+            _ -> 0
+          end
 
-        {val, Map.update(acc, val, [n], & [n, hd(&1)])}
+        {val, Map.update(acc, val, [n], &[n, hd(&1)])}
     end)
   end
 end
